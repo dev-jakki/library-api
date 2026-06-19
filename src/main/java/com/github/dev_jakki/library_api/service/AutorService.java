@@ -2,6 +2,7 @@ package com.github.dev_jakki.library_api.service;
 
 import com.github.dev_jakki.library_api.model.Autor;
 import com.github.dev_jakki.library_api.repository.AutorRepository;
+import com.github.dev_jakki.library_api.validator.AutorValidator;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,12 +13,15 @@ import java.util.UUID;
 public class AutorService {
 
     private final AutorRepository repository; // Injeção do service
+    private final AutorValidator validator;
 
-    public AutorService(AutorRepository repository) {
+    public AutorService(AutorRepository repository, AutorValidator validator) {
         this.repository = repository;
+        this.validator = validator;
     }
 
     public Autor salvar(Autor autor){
+        validator.validar(autor);
         return repository.save(autor);
     }
 
@@ -26,6 +30,7 @@ public class AutorService {
             throw new IllegalArgumentException("Autor não existente");
         }
 
+        validator.validar(autor);
         repository.save(autor);
     }
 
