@@ -3,18 +3,16 @@ package com.github.dev_jakki.library_api.validator;
 import com.github.dev_jakki.library_api.exceptions.RegisterDuplicateException;
 import com.github.dev_jakki.library_api.model.Autor;
 import com.github.dev_jakki.library_api.repository.AutorRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
 @Component
+@RequiredArgsConstructor // Automatiza injeção no construtor (vem do Lombok)
 public class AutorValidator {
 
-    private AutorRepository repository;
-
-    public AutorValidator(AutorRepository repository) {
-        this.repository = repository;
-    }
+    private final AutorRepository repository;
 
     public void validar(Autor autor) {
         if (existeAutorCadastrado(autor)) {

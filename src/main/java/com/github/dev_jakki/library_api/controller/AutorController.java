@@ -6,6 +6,7 @@ import com.github.dev_jakki.library_api.exceptions.OperationNotAllowedException;
 import com.github.dev_jakki.library_api.exceptions.RegisterDuplicateException;
 import com.github.dev_jakki.library_api.model.Autor;
 import com.github.dev_jakki.library_api.service.AutorService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -17,15 +18,11 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("autores")
-// http://localhost:8080/autores
+@RequestMapping("autores") // http://localhost:8080/autores
+@RequiredArgsConstructor // Automatiza injeção no construtor (vem do Lombok)
 public class AutorController {
 
     private final AutorService service;
-
-    public AutorController(AutorService service) {
-        this.service = service;
-    }
 
     @PostMapping // ou @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<Object> salvar(@RequestBody AutorDTO autor) {
