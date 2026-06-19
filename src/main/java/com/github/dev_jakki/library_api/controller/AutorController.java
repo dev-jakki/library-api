@@ -2,6 +2,7 @@ package com.github.dev_jakki.library_api.controller;
 
 import com.github.dev_jakki.library_api.controller.dto.AutorDTO;
 import com.github.dev_jakki.library_api.controller.dto.ResponseError;
+import com.github.dev_jakki.library_api.exceptions.OperationNotAllowedException;
 import com.github.dev_jakki.library_api.exceptions.RegisterDuplicateException;
 import com.github.dev_jakki.library_api.model.Autor;
 import com.github.dev_jakki.library_api.service.AutorService;
@@ -70,17 +71,22 @@ public class AutorController {
 
     // Método indempotente - independente de ter ID ou não, retorna sucesso
     @DeleteMapping("{id}")
-    public ResponseEntity<Void> deletar(@PathVariable("id") String id) {
-        var idAutor = UUID.fromString(id);
+    public ResponseEntity<Object> deletar(@PathVariable("id") String id) {
+        try {
+            var idAutor = UUID.fromString(id);
 
-        Optional<Autor> autorOptional = service.obterPorId(idAutor);
+            Optional<Autor> autorOptional = service.obterPorId(idAutor);
 
-        if (autorOptional.isEmpty()) {
-            return ResponseEntity.notFound().build();
+            if (autorOptional.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            service.deletar(autorOptional.get());
+            return ResponseEntity.noContent().build();
+        } catch (OperationNotAllowedException e) {
+            var erroResposta = ResponseError.responseDefault(e.getMessage());
+            return ResponseEntity.status(erroResposta.status()).body(erroResposta);
         }
-
-        service.deletar(autorOptional.get());
-        return ResponseEntity.noContent().build();
     }
 
     @GetMapping

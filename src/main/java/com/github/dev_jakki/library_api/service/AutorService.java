@@ -1,7 +1,9 @@
 package com.github.dev_jakki.library_api.service;
 
+import com.github.dev_jakki.library_api.exceptions.OperationNotAllowedException;
 import com.github.dev_jakki.library_api.model.Autor;
 import com.github.dev_jakki.library_api.repository.AutorRepository;
+import com.github.dev_jakki.library_api.repository.LivroRepository;
 import com.github.dev_jakki.library_api.validator.AutorValidator;
 import org.springframework.stereotype.Service;
 
@@ -14,10 +16,12 @@ public class AutorService {
 
     private final AutorRepository repository; // Injeção do service
     private final AutorValidator validator;
+    private final LivroRepository livroRepository;
 
-    public AutorService(AutorRepository repository, AutorValidator validator) {
+    public AutorService(AutorRepository repository, AutorValidator validator, LivroRepository livroRepository) {
         this.repository = repository;
         this.validator = validator;
+        this.livroRepository = livroRepository;
     }
 
     public Autor salvar(Autor autor){
@@ -39,6 +43,10 @@ public class AutorService {
     }
 
     public void deletar(Autor autor) {
+        if (possuiLivro(autor)) {
+            throw new OperationNotAllowedException("Não é permitido exluir um Autor que possui livros cadastrados!");
+        }
+
         repository.delete(autor);
     }
 
@@ -56,5 +64,9 @@ public class AutorService {
         }
 
         return repository.findAll(); // Se não passou nenhuma pesquisa/filtro, retorna todos
+    }
+
+    public boolean possuiLivro(Autor autor) {
+        return livroRepository.existsByAutor(autor);
     }
 }

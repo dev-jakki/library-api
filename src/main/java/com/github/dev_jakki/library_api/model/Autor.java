@@ -35,7 +35,7 @@ public class Autor {
 
     @OneToMany( // o fetch padrão aqui é Lazy, pois é OneToMany
             mappedBy = "autor",
-            cascade = CascadeType.ALL,
+//            cascade = CascadeType.ALL, // Apaga todos os dados vinculados ao Autor
             fetch = FetchType.LAZY
     )
     // @Transient

@@ -51,12 +51,11 @@ class LivroRepositoryTest {
         livro.setPreco(BigDecimal.valueOf(540));
         livro.setDataPubliacacao(LocalDate.of(1999, 3, 12));
 
-        Autor autor = new Autor();
-        autor.setNome("Geovana");
-        autor.setNacionalidade("Brasileira");
-        autor.setDataNascimento(LocalDate.of(2006, 3, 1));
+        Autor autor = autorRepository
+                .findById(UUID.fromString("d58d7689-14bc-48e1-a683-3923bf318cf3"))
+                .orElse(null);
 
-        autorRepository.save(autor);
+//        autorRepository.save(autor);
 
         livro.setAutor(autor);
 
