@@ -1,9 +1,7 @@
 package com.github.dev_jakki.library_api.controller;
 
 import com.github.dev_jakki.library_api.controller.dto.RegisterBookDTO;
-import com.github.dev_jakki.library_api.controller.dto.ErroResposta;
 import com.github.dev_jakki.library_api.controller.mappers.LivroMapper;
-import com.github.dev_jakki.library_api.exceptions.RegisterDuplicateException;
 import com.github.dev_jakki.library_api.model.Livro;
 import com.github.dev_jakki.library_api.service.LivroService;
 import jakarta.validation.Valid;
@@ -25,17 +23,12 @@ public class LivroController implements GenericController {
     private final LivroMapper mapper;
 
     @PostMapping
-    public ResponseEntity<Object> cadastrar(@RequestBody @Valid RegisterBookDTO dto) {
-        try {
-            Livro livro = mapper.toEntity(dto);
-            service.cadastrar(livro);
+    public ResponseEntity<Void> cadastrar(@RequestBody @Valid RegisterBookDTO dto) {
+        Livro livro = mapper.toEntity(dto);
+        service.cadastrar(livro);
 
-            URI url = gerarHeaderLocation(livro.getId());
+        URI url = gerarHeaderLocation(livro.getId());
 
-            return ResponseEntity.created(url).build();
-        } catch (RegisterDuplicateException e) {
-            var erroDTO = ErroResposta.conflict(e.getMessage());
-            return ResponseEntity.status(erroDTO.status()).body(erroDTO);
-        }
+        return ResponseEntity.created(url).build();
     }
 }

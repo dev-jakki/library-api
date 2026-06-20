@@ -2,6 +2,8 @@ package com.github.dev_jakki.library_api.controller.common;
 
 import com.github.dev_jakki.library_api.controller.dto.ErroCampo;
 import com.github.dev_jakki.library_api.controller.dto.ErroResposta;
+import com.github.dev_jakki.library_api.exceptions.OperationNotAllowedException;
+import com.github.dev_jakki.library_api.exceptions.RegisterDuplicateException;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -25,6 +27,28 @@ public class GlobalExceptionHandler {
                 .collect(Collectors.toList());
 
         return new ErroResposta(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Erro de validação", listaErros);
+    }
+
+    @ExceptionHandler(RegisterDuplicateException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErroResposta handleRegisterDuplicateException(RegisterDuplicateException e) {
+        return ErroResposta.conflict(e.getMessage());
+    }
+
+    @ExceptionHandler(OperationNotAllowedException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErroResposta handleOperationNotAllowedException(OperationNotAllowedException e) {
+        return ErroResposta.responseDefault(e.getMessage());
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErroResposta handleException(Exception e) {
+        return new ErroResposta(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "Erro interno no servidor. Tente novamente mais tarde.",
+                List.of()
+        );
     }
 
 }

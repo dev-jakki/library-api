@@ -1,10 +1,7 @@
 package com.github.dev_jakki.library_api.controller;
 
 import com.github.dev_jakki.library_api.controller.dto.AutorDTO;
-import com.github.dev_jakki.library_api.controller.dto.ErroResposta;
 import com.github.dev_jakki.library_api.controller.mappers.AutorMapper;
-import com.github.dev_jakki.library_api.exceptions.OperationNotAllowedException;
-import com.github.dev_jakki.library_api.exceptions.RegisterDuplicateException;
 import com.github.dev_jakki.library_api.model.Autor;
 import com.github.dev_jakki.library_api.service.AutorService;
 import jakarta.validation.Valid;
@@ -27,19 +24,14 @@ public class AutorController implements GenericController {
     private final AutorMapper mapper;
 
     @PostMapping // ou @RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity<Object> salvar(@RequestBody @Valid AutorDTO dto) {
-        try {
-            Autor autor = mapper.toEntity(dto);
-            service.salvar(autor);
+    public ResponseEntity<Void> salvar(@RequestBody @Valid AutorDTO dto) {
+        Autor autor = mapper.toEntity(dto);
+        service.salvar(autor);
 
-            URI url = gerarHeaderLocation(autor.getId());
+        URI url = gerarHeaderLocation(autor.getId());
 
-            // return new ResponseEntity("Autor salvo com sucesso! " + autor, HttpStatus.CREATED);
-            return ResponseEntity.created(url).build();
-        } catch (RegisterDuplicateException e) {
-            var erroDTO = ErroResposta.conflict(e.getMessage());
-            return ResponseEntity.status(erroDTO.status()).body(erroDTO);
-        }
+        // return new ResponseEntity("Autor salvo com sucesso! " + autor, HttpStatus.CREATED);
+        return ResponseEntity.created(url).build();
     }
 
     @GetMapping("{id}")
@@ -51,7 +43,7 @@ public class AutorController implements GenericController {
                 .map(autor -> {
                     AutorDTO dto = mapper.toDTO(autor);
                     return ResponseEntity.ok(dto);
-                }).orElseGet( () -> ResponseEntity.notFound().build() );
+                }).orElseGet(() -> ResponseEntity.notFound().build());
 
 //        Optional<Autor> autorOptional = service.obterPorId(idAutor);
 //
@@ -73,22 +65,17 @@ public class AutorController implements GenericController {
 
     // Metodo indempotente independente de ter ID ou não, retorna sucesso
     @DeleteMapping("{id}")
-    public ResponseEntity<Object> deletar(@PathVariable("id") String id) {
-        try {
-            var idAutor = UUID.fromString(id);
+    public ResponseEntity<Void> deletar(@PathVariable("id") String id) {
+        var idAutor = UUID.fromString(id);
 
-            Optional<Autor> autorOptional = service.obterPorId(idAutor);
+        Optional<Autor> autorOptional = service.obterPorId(idAutor);
 
-            if (autorOptional.isEmpty()) {
-                return ResponseEntity.notFound().build();
-            }
-
-            service.deletar(autorOptional.get());
-            return ResponseEntity.noContent().build();
-        } catch (OperationNotAllowedException e) {
-            var erroResposta = ErroResposta.responseDefault(e.getMessage());
-            return ResponseEntity.status(erroResposta.status()).body(erroResposta);
+        if (autorOptional.isEmpty()) {
+            return ResponseEntity.notFound().build();
         }
+
+        service.deletar(autorOptional.get());
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping
@@ -106,26 +93,21 @@ public class AutorController implements GenericController {
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<Object> atualizar(@PathVariable("id") String id, @RequestBody @Valid AutorDTO dto) {
-        try {
-            var idAutor = UUID.fromString(id);
+    public ResponseEntity<Void> atualizar(@PathVariable("id") String id, @RequestBody @Valid AutorDTO dto) {
+        var idAutor = UUID.fromString(id);
 
-            Optional<Autor> autorOptional = service.obterPorId(idAutor);
+        Optional<Autor> autorOptional = service.obterPorId(idAutor);
 
-            if (autorOptional.isEmpty()) {
-                return ResponseEntity.notFound().build();
-            }
-
-            var autor = autorOptional.get();
-            autor.setNome(dto.nome());
-            autor.setNacionalidade(dto.nacionalidade());
-            autor.setDataNascimento(dto.dataNascimento());
-
-            service.atualizar(autor);
-            return ResponseEntity.noContent().build();
-        } catch (RegisterDuplicateException e) {
-            var erroDTO = ErroResposta.conflict(e.getMessage());
-            return ResponseEntity.status(erroDTO.status()).body(erroDTO);
+        if (autorOptional.isEmpty()) {
+            return ResponseEntity.notFound().build();
         }
+
+        var autor = autorOptional.get();
+        autor.setNome(dto.nome());
+        autor.setNacionalidade(dto.nacionalidade());
+        autor.setDataNascimento(dto.dataNascimento());
+
+        service.atualizar(autor);
+        return ResponseEntity.noContent().build();
     }
 }
