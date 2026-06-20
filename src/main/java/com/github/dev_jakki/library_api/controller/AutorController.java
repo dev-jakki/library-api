@@ -2,6 +2,7 @@ package com.github.dev_jakki.library_api.controller;
 
 import com.github.dev_jakki.library_api.controller.dto.AutorDTO;
 import com.github.dev_jakki.library_api.controller.dto.ResponseError;
+import com.github.dev_jakki.library_api.controller.mappers.AutorMapper;
 import com.github.dev_jakki.library_api.exceptions.OperationNotAllowedException;
 import com.github.dev_jakki.library_api.exceptions.RegisterDuplicateException;
 import com.github.dev_jakki.library_api.model.Autor;
@@ -10,7 +11,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
@@ -21,24 +21,21 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("autores") // http://localhost:8080/autores
 @RequiredArgsConstructor // Automatiza injeção no construtor (vem do Lombok)
-public class AutorController {
+public class AutorController implements GenericController {
 
     private final AutorService service;
+    private final AutorMapper mapper;
 
     @PostMapping // ou @RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity<Object> salvar(@RequestBody @Valid AutorDTO autor) {
+    public ResponseEntity<Object> salvar(@RequestBody @Valid AutorDTO dto) {
         try {
-            Autor autorEntidade = autor.mapearParaAutor();
-            service.salvar(autorEntidade);
+            Autor autor = mapper.toEntity(dto);
+            service.salvar(autor);
 
-            URI location = ServletUriComponentsBuilder
-                    .fromCurrentRequest()
-                    .path("/{id}")
-                    .buildAndExpand(autorEntidade.getId())
-                    .toUri();
+            URI url = gerarHeaderLocation(autor.getId());
 
             // return new ResponseEntity("Autor salvo com sucesso! " + autor, HttpStatus.CREATED);
-            return ResponseEntity.created(location).build();
+            return ResponseEntity.created(url).build();
         } catch (RegisterDuplicateException e) {
             var erroDTO = ResponseError.conflict(e.getMessage());
             return ResponseEntity.status(erroDTO.status()).body(erroDTO);
@@ -49,25 +46,32 @@ public class AutorController {
     public ResponseEntity<AutorDTO> obterPorId(@PathVariable("id") String id) {
         var idAutor = UUID.fromString(id);
 
-        Optional<Autor> autorOptional = service.obterPorId(idAutor);
+        return service
+                .obterPorId(idAutor)
+                .map(autor -> {
+                    AutorDTO dto = mapper.toDTO(autor);
+                    return ResponseEntity.ok(dto);
+                }).orElseGet( () -> ResponseEntity.notFound().build() );
 
-        if (autorOptional.isPresent()) {
-            Autor autor = autorOptional.get();
-
-            AutorDTO dto = new AutorDTO(
-                    autor.getId(),
-                    autor.getNome(),
-                    autor.getDataNascimento(),
-                    autor.getNacionalidade()
-            );
-
-            return ResponseEntity.ok(dto);
-        }
-
-        return ResponseEntity.notFound().build();
+//        Optional<Autor> autorOptional = service.obterPorId(idAutor);
+//
+//        if (autorOptional.isPresent()) {
+//            Autor autor = autorOptional.get();
+//
+//            AutorDTO dto = new AutorDTO(
+//                    autor.getId(),
+//                    autor.getNome(),
+//                    autor.getDataNascimento(),
+//                    autor.getNacionalidade()
+//            );
+//
+//            return ResponseEntity.ok(dto);
+//        }
+//
+//        return ResponseEntity.notFound().build();
     }
 
-    // Método indempotente - independente de ter ID ou não, retorna sucesso
+    // Metodo indempotente independente de ter ID ou não, retorna sucesso
     @DeleteMapping("{id}")
     public ResponseEntity<Object> deletar(@PathVariable("id") String id) {
         try {
@@ -92,21 +96,17 @@ public class AutorController {
             @RequestParam(value = "nome", required = false) String nome,
             @RequestParam(value = "nacionalidade", required = false) String nacionalidade
     ) {
-        List<Autor> resultado = service.pesquisar(nome, nacionalidade);
+        List<Autor> resultado = service.pesquisarByExample(nome, nacionalidade);
         List<AutorDTO> autores = resultado
                 .stream()
-                .map(autor -> new AutorDTO(
-                    autor.getId(),
-                    autor.getNome(),
-                    autor.getDataNascimento(),
-                    autor.getNacionalidade())
-        ).collect(Collectors.toList());
+                .map(mapper::toDTO)
+                .collect(Collectors.toList());
 
         return ResponseEntity.ok(autores);
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<Object> atualizar(@PathVariable("id") String id, @RequestBody AutorDTO dto) {
+    public ResponseEntity<Object> atualizar(@PathVariable("id") String id, @RequestBody @Valid AutorDTO dto) {
         try {
             var idAutor = UUID.fromString(id);
 
