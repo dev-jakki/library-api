@@ -36,7 +36,7 @@ public class TransacaoService {
         livro.setIsbn("349-34-345");
         livro.setGenero(GeneroLivro.BIOGRAFIA);
         livro.setPreco(BigDecimal.valueOf(540));
-        livro.setDataPubliacacao(LocalDate.of(1999, 3, 12));
+        livro.setDataPublicacao(LocalDate.of(1999, 3, 12));
         livro.setAutor(autor);
 
         livroRepository.save(livro);

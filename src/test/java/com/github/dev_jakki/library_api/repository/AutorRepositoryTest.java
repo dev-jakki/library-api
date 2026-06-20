@@ -86,7 +86,7 @@ public class AutorRepositoryTest {
         livro.setIsbn("34-45-564");
         livro.setGenero(GeneroLivro.BIOGRAFIA);
         livro.setPreco(BigDecimal.valueOf(50));
-        livro.setDataPubliacacao(LocalDate.of(1999, 3, 12));
+        livro.setDataPublicacao(LocalDate.of(1999, 3, 12));
         livro.setAutor(autor);
 
         Livro livro2 = new Livro();
@@ -94,7 +94,7 @@ public class AutorRepositoryTest {
         livro2.setIsbn("345-3458-345");
         livro2.setGenero(GeneroLivro.BIOGRAFIA);
         livro2.setPreco(BigDecimal.valueOf(60));
-        livro2.setDataPubliacacao(LocalDate.of(2005, 3, 12));
+        livro2.setDataPublicacao(LocalDate.of(2005, 3, 12));
         livro2.setAutor(autor);
 
         autor.setLivros(new ArrayList<>());

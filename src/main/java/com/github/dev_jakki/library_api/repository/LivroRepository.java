@@ -24,4 +24,6 @@ public interface LivroRepository extends JpaRepository<Livro, UUID> {
     // O JPA vai gerar "select * from livro where titulo = ? and genero = ?"
     List<Livro> findByTituloOrGenero(String titulo, Enum<GeneroLivro> genero);
 
+    boolean existsByAutor(Autor autor);
+
 }
