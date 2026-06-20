@@ -10,12 +10,11 @@ import java.util.UUID;
 
 public record RegisterBookDTO(
         @NotBlank(message = "Campo obrigatório")
-        @Size(min = 10, max = 13, message = "Campo aceita de 10 a 13 caracteres")
         @ISBN
         String isbn,
 
         @NotBlank(message = "Campo obrigatório")
-        @Size(min = 3, max = 200, message = "Campo aceita de 3 a 200 caracteres")
+        @Size(min = 3, max = 150, message = "Campo aceita de 3 a 150 caracteres")
         String titulo,
 
         @NotNull(message = "Campo obrigatório")
