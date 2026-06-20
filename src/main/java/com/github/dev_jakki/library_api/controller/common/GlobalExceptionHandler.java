@@ -1,6 +1,7 @@
 package com.github.dev_jakki.library_api.controller.common;
 
-import com.github.dev_jakki.library_api.controller.dto.ResponseError;
+import com.github.dev_jakki.library_api.controller.dto.ErroCampo;
+import com.github.dev_jakki.library_api.controller.dto.ErroResposta;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -16,14 +17,14 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-    public ResponseError handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+    public ErroResposta handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         List<FieldError> fieldErrors = e.getFieldErrors();
-        List<com.github.dev_jakki.library_api.controller.dto.FieldError> listaErros = fieldErrors
+        List<ErroCampo> listaErros = fieldErrors
                 .stream()
-                .map(f -> new com.github.dev_jakki.library_api.controller.dto.FieldError(f.getField(), f.getDefaultMessage()))
+                .map(f -> new ErroCampo(f.getField(), f.getDefaultMessage()))
                 .collect(Collectors.toList());
 
-        return new ResponseError(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Erro de validação", listaErros);
+        return new ErroResposta(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Erro de validação", listaErros);
     }
 
 }

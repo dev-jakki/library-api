@@ -1,7 +1,7 @@
 package com.github.dev_jakki.library_api.controller;
 
 import com.github.dev_jakki.library_api.controller.dto.AutorDTO;
-import com.github.dev_jakki.library_api.controller.dto.ResponseError;
+import com.github.dev_jakki.library_api.controller.dto.ErroResposta;
 import com.github.dev_jakki.library_api.controller.mappers.AutorMapper;
 import com.github.dev_jakki.library_api.exceptions.OperationNotAllowedException;
 import com.github.dev_jakki.library_api.exceptions.RegisterDuplicateException;
@@ -37,7 +37,7 @@ public class AutorController implements GenericController {
             // return new ResponseEntity("Autor salvo com sucesso! " + autor, HttpStatus.CREATED);
             return ResponseEntity.created(url).build();
         } catch (RegisterDuplicateException e) {
-            var erroDTO = ResponseError.conflict(e.getMessage());
+            var erroDTO = ErroResposta.conflict(e.getMessage());
             return ResponseEntity.status(erroDTO.status()).body(erroDTO);
         }
     }
@@ -86,7 +86,7 @@ public class AutorController implements GenericController {
             service.deletar(autorOptional.get());
             return ResponseEntity.noContent().build();
         } catch (OperationNotAllowedException e) {
-            var erroResposta = ResponseError.responseDefault(e.getMessage());
+            var erroResposta = ErroResposta.responseDefault(e.getMessage());
             return ResponseEntity.status(erroResposta.status()).body(erroResposta);
         }
     }
@@ -124,7 +124,7 @@ public class AutorController implements GenericController {
             service.atualizar(autor);
             return ResponseEntity.noContent().build();
         } catch (RegisterDuplicateException e) {
-            var erroDTO = ResponseError.conflict(e.getMessage());
+            var erroDTO = ErroResposta.conflict(e.getMessage());
             return ResponseEntity.status(erroDTO.status()).body(erroDTO);
         }
     }

@@ -1,7 +1,7 @@
 package com.github.dev_jakki.library_api.controller;
 
 import com.github.dev_jakki.library_api.controller.dto.RegisterBookDTO;
-import com.github.dev_jakki.library_api.controller.dto.ResponseError;
+import com.github.dev_jakki.library_api.controller.dto.ErroResposta;
 import com.github.dev_jakki.library_api.controller.mappers.LivroMapper;
 import com.github.dev_jakki.library_api.exceptions.RegisterDuplicateException;
 import com.github.dev_jakki.library_api.model.Livro;
@@ -34,7 +34,7 @@ public class LivroController implements GenericController {
 
             return ResponseEntity.created(url).build();
         } catch (RegisterDuplicateException e) {
-            var erroDTO = ResponseError.conflict(e.getMessage());
+            var erroDTO = ErroResposta.conflict(e.getMessage());
             return ResponseEntity.status(erroDTO.status()).body(erroDTO);
         }
     }
