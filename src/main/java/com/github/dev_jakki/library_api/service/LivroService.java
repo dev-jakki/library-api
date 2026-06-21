@@ -1,18 +1,71 @@
 package com.github.dev_jakki.library_api.service;
 
+import com.github.dev_jakki.library_api.model.GeneroLivro;
 import com.github.dev_jakki.library_api.model.Livro;
 import com.github.dev_jakki.library_api.repository.LivroRepository;
+import com.github.dev_jakki.library_api.validator.LivroValidator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
+import java.util.UUID;
+
+import static com.github.dev_jakki.library_api.repository.specs.LivroSpecs.*;
 
 @Service
 @RequiredArgsConstructor
 public class LivroService {
 
     private final LivroRepository repository;
+    private final LivroValidator validator;
 
     public Livro cadastrar(Livro livro) {
+        validator.validar(livro);
         return repository.save(livro);
     }
 
+    public Optional<Livro> obterPorId(UUID id) {
+        return repository.findById(id);
+    }
+
+    public void deletar(Livro livro) {
+        repository.delete(livro);
+    }
+
+    public Page<Livro> pesquisar(
+            String isbn,
+            String titulo,
+            Integer anoPublicacao,
+            GeneroLivro genero,
+            String nomeAutor,
+            Integer pagina,
+            Integer regsPagina
+    ) {
+
+        Specification<Livro> specs = Specification.where( (root, query, cb) ->  cb.conjunction() );
+
+        if (isbn != null) specs = specs.and(isbnEqual(isbn));
+        if (titulo != null) specs = specs.and(tituloLike(titulo));
+        if (anoPublicacao != null) specs = specs.and(anoPublicacaoEqual(anoPublicacao));
+        if (genero != null) specs = specs.and(generoEqual(genero));
+        if (nomeAutor != null) specs = specs.and(nomeAutorLike(nomeAutor));
+
+        Pageable pageRequest = PageRequest.of(pagina, regsPagina);
+
+        return repository.findAll(specs, pageRequest);
+
+    }
+
+    public void atualizar(Livro livro) {
+        if (livro.getId() == null) {
+            throw new IllegalArgumentException("Livro não existente");
+        }
+
+        validator.validar(livro);
+        repository.save(livro);
+    }
 }

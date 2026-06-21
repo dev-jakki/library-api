@@ -24,9 +24,6 @@ public record RegisterBookDTO(
         @NotNull(message = "Campo obrigatório")
         GeneroLivro genero,
 
-        @NotNull(message = "Campo não pode ser nulo")
-        @DecimalMin("0.00")
-        @Digits(integer = 8, fraction = 2)
         BigDecimal preco,
 
         @NotNull(message = "Campo obrigatório")

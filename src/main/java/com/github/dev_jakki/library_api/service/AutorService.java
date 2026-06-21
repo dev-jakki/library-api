@@ -28,7 +28,7 @@ public class AutorService {
 //        this.livroRepository = livroRepository;
 //    }
 
-    public Autor salvar(Autor autor){
+    public Autor salvar(Autor autor) {
         validator.validar(autor);
         return repository.save(autor);
     }
