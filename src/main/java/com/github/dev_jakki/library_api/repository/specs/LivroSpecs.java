@@ -44,4 +44,14 @@ public class LivroSpecs {
             // return cb.like( cb.lower(root.get("autor").get("nome")), "%" + nome.toLowerCase() + "%");
         };
     }
+//
+//    public static Specification<Livro> anoPublicacaoSuperior2020(S) {
+//        return (root, query, cb) ->
+//                cb.equal( cb.function(
+//                        "to_char",
+//                        String.class,
+//                        root.get("dataPublicacao"),
+//                        cb.literal("YYYY")
+//                ), anoPublicacao.toString());
+//    }
 }

@@ -3,6 +3,7 @@ package com.github.dev_jakki.library_api.service;
 import com.github.dev_jakki.library_api.model.GeneroLivro;
 import com.github.dev_jakki.library_api.model.Livro;
 import com.github.dev_jakki.library_api.repository.LivroRepository;
+import com.github.dev_jakki.library_api.validator.LivroValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -18,8 +19,10 @@ import static com.github.dev_jakki.library_api.repository.specs.LivroSpecs.*;
 public class LivroService {
 
     private final LivroRepository repository;
+    private final LivroValidator validator;
 
     public Livro cadastrar(Livro livro) {
+        validator.validar(livro);
         return repository.save(livro);
     }
 
@@ -43,5 +46,14 @@ public class LivroService {
 
         return repository.findAll(specs);
 
+    }
+
+    public void atualizar(Livro livro) {
+        if (livro.getId() == null) {
+            throw new IllegalArgumentException("Livro não existente");
+        }
+
+        validator.validar(livro);
+        repository.save(livro);
     }
 }

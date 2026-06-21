@@ -1,5 +1,6 @@
 package com.github.dev_jakki.library_api.controller;
 
+import com.github.dev_jakki.library_api.controller.dto.AutorDTO;
 import com.github.dev_jakki.library_api.controller.dto.RegisterBookDTO;
 import com.github.dev_jakki.library_api.controller.dto.ResultSearchBookDTO;
 import com.github.dev_jakki.library_api.controller.mappers.LivroMapper;
@@ -12,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -49,17 +49,15 @@ public class LivroController implements GenericController {
     }
 
     @DeleteMapping("{id}")
-    public ResponseEntity<Void> deletar(@PathVariable("id") String id) {
+    public ResponseEntity<Object> deletar(@PathVariable("id") String id) {
         UUID idLivro = UUID.fromString(id);
 
-        Optional<Livro> livroOptional = service.obterPorId(idLivro);
-
-        if (livroOptional.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        service.deletar(livroOptional.get());
-        return ResponseEntity.noContent().build();
+        return service
+                .obterPorId(idLivro)
+                .map(livro -> {
+                    service.deletar(livro);
+                    return ResponseEntity.noContent().build();
+                }).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping
@@ -83,5 +81,34 @@ public class LivroController implements GenericController {
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(livros);
+    }
+
+    @PutMapping("{id}")
+    public ResponseEntity<Object> atualizar(
+            @PathVariable("id")
+            String id,
+            @RequestBody @Valid
+            RegisterBookDTO dto
+    ) {
+        UUID idLivro = UUID.fromString(id);
+
+        return service
+                .obterPorId(idLivro)
+                .map(livro -> {
+                    Livro l = mapper.toEntity(dto);
+
+                    livro.setDataPublicacao(l.getDataPublicacao());
+                    livro.setIsbn(l.getIsbn());
+                    livro.setTitulo(l.getTitulo());
+                    livro.setGenero(l.getGenero());
+                    livro.setPreco(l.getPreco());
+                    livro.setAutor(l.getAutor());
+
+                    service.atualizar(livro);
+
+                    return ResponseEntity.noContent().build();
+
+                }).orElseGet(() -> ResponseEntity.notFound().build());
+
     }
 }
