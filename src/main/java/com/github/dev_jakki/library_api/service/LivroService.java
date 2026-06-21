@@ -5,10 +5,12 @@ import com.github.dev_jakki.library_api.model.Livro;
 import com.github.dev_jakki.library_api.repository.LivroRepository;
 import com.github.dev_jakki.library_api.validator.LivroValidator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -34,7 +36,15 @@ public class LivroService {
         repository.delete(livro);
     }
 
-    public List<Livro> pesquisar(String isbn, String titulo, Integer anoPublicacao, GeneroLivro genero, String nomeAutor) {
+    public Page<Livro> pesquisar(
+            String isbn,
+            String titulo,
+            Integer anoPublicacao,
+            GeneroLivro genero,
+            String nomeAutor,
+            Integer pagina,
+            Integer regsPagina
+    ) {
 
         Specification<Livro> specs = Specification.where( (root, query, cb) ->  cb.conjunction() );
 
@@ -44,7 +54,9 @@ public class LivroService {
         if (genero != null) specs = specs.and(generoEqual(genero));
         if (nomeAutor != null) specs = specs.and(nomeAutorLike(nomeAutor));
 
-        return repository.findAll(specs);
+        Pageable pageRequest = PageRequest.of(pagina, regsPagina);
+
+        return repository.findAll(specs, pageRequest);
 
     }
 

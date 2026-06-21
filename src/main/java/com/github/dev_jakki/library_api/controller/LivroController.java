@@ -1,6 +1,5 @@
 package com.github.dev_jakki.library_api.controller;
 
-import com.github.dev_jakki.library_api.controller.dto.AutorDTO;
 import com.github.dev_jakki.library_api.controller.dto.RegisterBookDTO;
 import com.github.dev_jakki.library_api.controller.dto.ResultSearchBookDTO;
 import com.github.dev_jakki.library_api.controller.mappers.LivroMapper;
@@ -9,14 +8,12 @@ import com.github.dev_jakki.library_api.model.Livro;
 import com.github.dev_jakki.library_api.service.LivroService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("livros")
@@ -61,7 +58,7 @@ public class LivroController implements GenericController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ResultSearchBookDTO>> pesquisar(
+    public ResponseEntity<Page<ResultSearchBookDTO>> pesquisar(
             @RequestParam(name = "isbn", required = false)
             String isbn,
             @RequestParam(name = "titulo", required = false)
@@ -71,16 +68,17 @@ public class LivroController implements GenericController {
             @RequestParam(name = "genero", required = false)
             GeneroLivro genero,
             @RequestParam(name = "nome-autor", required = false)
-            String nomeAutor
+            String nomeAutor,
+            @RequestParam(name = "pagina", defaultValue = "0")
+            Integer pagina,
+            @RequestParam(name = "regs-pagina", defaultValue = "10")
+            Integer regsPagina
     ) {
-        var result = service.pesquisar(isbn, titulo, anoPublicacao, genero, nomeAutor);
+        Page<Livro> paginaResult = service.pesquisar(isbn, titulo, anoPublicacao, genero, nomeAutor, pagina, regsPagina);
 
-        List<ResultSearchBookDTO> livros = result
-                .stream()
-                .map(mapper::toDTO)
-                .collect(Collectors.toList());
+        Page<ResultSearchBookDTO> livrosPaginados = paginaResult.map(mapper::toDTO);
 
-        return ResponseEntity.ok(livros);
+        return ResponseEntity.ok(livrosPaginados);
     }
 
     @PutMapping("{id}")
